@@ -5,16 +5,19 @@ import { useMupdf } from "@/hooks/useMupdf.hook";
 import { ResizableBox } from "react-resizable";
 import "react-resizable/css/styles.css"; // Import necessary styles for react-resizable
 import Draggable from "react-free-draggable";
+import { ArcherContainer, ArcherElement } from "react-archer";
 
 function App() {
   const { isWorkerInitialized, renderPage, loadDocument, getPageCount } =
     useMupdf();
   const [pageImgUrl, setPageImgUrl] = useState(null);
+  const [hoveredCanvasId, setHoveredCanvasId] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [canvases, setCanvases] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [connections, setConnections] = useState([]);
   const [modalData, setModalData] = useState({
     id: null,
     name: "",
@@ -112,12 +115,14 @@ function App() {
     setIsModalOpen(false);
   };
 
+  console.log(canvases);
+
   const renderCanvas = (canvas) => (
     <Draggable
-      bounds=".boxs"
-      scale={1}
       key={canvas.id}
+      className="resize-handle"
       defaultPosition={{ x: canvas.position.x, y: canvas.position.y }}
+      title={canvas?.name}
       onStop={(e, data) => {
         setCanvases((prev) =>
           prev.map((c) =>
@@ -128,30 +133,33 @@ function App() {
         );
       }}
     >
-      {/* Use ResizableBox for resizing */}
-      <ResizableBox
-        width={canvas.size}
-        height={canvas.size}
-        minConstraints={[50, 50]} // Minimum size constraints
-        maxConstraints={[500, 500]} // Maximum size constraints
-        onResizeStop={(e, data) => {
-          setCanvases((prev) =>
-            prev.map((c) =>
-              c.id === canvas.id ? { ...c, size: data.size.width } : c
-            )
-          );
+      <div
+        className="canvas"
+        style={{
+          position: "absolute",
+          left: canvas.position.x,
+          top: canvas.position.y,
         }}
+        onContextMenu={(e) => handleRightClick(e, canvas)}
+        onMouseEnter={() => setHoveredCanvasId(canvas.id)} // Fare öğeye girince
+        onMouseLeave={() => setHoveredCanvasId(null)} // Fare öğeden çıkınca
       >
-        <div
-          className="canvas"
-          style={{
-            position: "absolute",
-            left: canvas.position.x,
-            top: canvas.position.y,
+        {/* ResizableBox sadece fare üzerinde olduğunda aktif */}
+        <ResizableBox
+          width={canvas.size}
+          height={canvas.size}
+          resizeHandles={
+            hoveredCanvasId === canvas.id ? ["se", "sw", "ne", "nw"] : []
+          } // Sadece fare üzerindeyse resize handles göster
+          onResizeStop={(e, data) => {
+            setCanvases((prev) =>
+              prev.map((c) =>
+                c.id === canvas.id ? { ...c, size: data.size.width } : c
+              )
+            );
           }}
-          onContextMenu={(e) => handleRightClick(e, canvas)}
-        ></div>
-      </ResizableBox>
+        ></ResizableBox>
+      </div>
     </Draggable>
   );
 

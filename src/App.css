@@ -2,6 +2,7 @@
   position: relative;
 }
 
+
 .modal {
   position: absolute;
   background: white;
@@ -33,6 +34,7 @@
 
 .canvas {
   position: relative;
+  background-color: rgb(39, 108, 184);
 }
 
 .canvas-content {
