@@ -1,4 +1,46 @@
-#root {
+.app {
+  position: relative;
+}
+
+.modal {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  z-index: 1000;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.canvas {
+  display: inline-block;
+  position: relative;
+  margin: 1rem;
+}
+
+.resizable {
+  display: inline-block;
+}
+
+.canvases {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.modal input {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.canvas {
+  position: relative;
+}
+
+.canvas-content {
+  border: 1px solid #ccc;
+  background-color: lightgray;
   display: flex;
   justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
 }

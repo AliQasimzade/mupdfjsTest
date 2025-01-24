@@ -3,40 +3,71 @@ import * as mupdfjs from "mupdf/mupdfjs";
 
 export const MUPDF_LOADED = "MUPDF_LOADED";
 
-class MupdfWorker {
-  constructor() {
-    this.document = undefined;
-    this.initializeMupdf();
-  }
+const createMupdfWorker = () => {
+  let document = null;
 
-  initializeMupdf() {
+  const initializeMupdf = () => {
     try {
       postMessage(MUPDF_LOADED);
     } catch (error) {
       console.error("Failed to initialize MuPDF:", error);
     }
-  }
+  };
 
-  loadDocument(document) {
-    this.document = mupdfjs.PDFDocument.openDocument(
-      document,
-      "application/pdf"
-    );
+  const loadDocument = (documentBuffer) => {
+    try {
+      document = mupdfjs.PDFDocument.openDocument(
+        documentBuffer,
+        "application/pdf"
+      );
+      return true;
+    } catch (error) {
+      console.error("Failed to load document:", error);
+      throw error;
+    }
+  };
 
-    return true;
-  }
+  const renderPageAsImage = (pageIndex = 0, scale = 0.5) => {
+    if (!document) {
+      throw new Error("Document not loaded");
+    }
 
-  renderPageAsImage(pageIndex = 0, scale = 1) {
-    if (!this.document) throw new Error("Document not loaded");
+    try {
+      const page = document.loadPage(pageIndex);
+      const pixmap = page.toPixmap(
+        [scale, 0, 0, scale, 0, 0],
+        mupdfjs.ColorSpace.DeviceRGB
+      );
+      return pixmap.asPNG();
+    } catch (error) {
+      console.error("Failed to render page:", error);
+      throw error;
+    }
+  };
 
-    const page = this.document.loadPage(pageIndex);
-    const pixmap = page.toPixmap(
-      [scale, 0, 0, scale, 0, 0],
-      mupdfjs.ColorSpace.DeviceRGB
-    );
+  const getPageCount = () => {
+    if (!document) {
+      throw new Error("Document not loaded");
+    }
 
-    return pixmap.asPNG();
-  }
-}
+    try {
+      return document.countPages();
+    } catch (error) {
+      console.error("Failed to get page count:", error);
+      throw error;
+    }
+  };
 
-Comlink.expose(new MupdfWorker());
+  // Initialize the worker
+  initializeMupdf();
+
+  // Expose the API
+  return {
+    loadDocument,
+    renderPageAsImage,
+    getPageCount, // Expose this method to get total page count
+  };
+};
+
+// Expose the worker API using Comlink
+Comlink.expose(createMupdfWorker());
