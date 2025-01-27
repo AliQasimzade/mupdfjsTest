@@ -27,7 +27,7 @@ const createMupdfWorker = () => {
     }
   };
 
-  const renderPageAsImage = (pageIndex = 0, scale = 0.5) => {
+  const renderPageAsImage = (pageIndex = 0, scale = 0.3) => {
     if (!document) {
       throw new Error("Document not loaded");
     }

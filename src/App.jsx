@@ -2,22 +2,19 @@ import "@/App.css";
 import React, { useEffect, useState } from "react";
 import ReactPaginate from "react-paginate";
 import { useMupdf } from "@/hooks/useMupdf.hook";
-import { ResizableBox } from "react-resizable";
-import "react-resizable/css/styles.css"; // Import necessary styles for react-resizable
+import { Resizable } from "re-resizable";
 import Draggable from "react-free-draggable";
-import { ArcherContainer, ArcherElement } from "react-archer";
 
 function App() {
   const { isWorkerInitialized, renderPage, loadDocument, getPageCount } =
     useMupdf();
   const [pageImgUrl, setPageImgUrl] = useState(null);
-  const [hoveredCanvasId, setHoveredCanvasId] = useState(null);
+  const [isResizing, setIsResizing] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [canvases, setCanvases] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [connections, setConnections] = useState([]);
   const [modalData, setModalData] = useState({
     id: null,
     name: "",
@@ -70,7 +67,9 @@ function App() {
   };
 
   const handleRightClick = (event, canvas = null) => {
+    event.stopPropagation();
     event.preventDefault();
+
     const { clientX, clientY } = event;
     setModalPosition({ x: clientX, y: clientY });
 
@@ -115,14 +114,21 @@ function App() {
     setIsModalOpen(false);
   };
 
-  console.log(canvases);
+  const handleDeleteCanvas = () => {
+    if (modalData.id) {
+      setCanvases((prev) =>
+        prev.filter((canvas) => canvas.id !== modalData.id)
+      );
+    }
+    setIsModalOpen(false);
+  };
 
   const renderCanvas = (canvas) => (
     <Draggable
       key={canvas.id}
       className="resize-handle"
       defaultPosition={{ x: canvas.position.x, y: canvas.position.y }}
-      title={canvas?.name}
+      disabled={isResizing} // Disable dragging while resizing
       onStop={(e, data) => {
         setCanvases((prev) =>
           prev.map((c) =>
@@ -140,25 +146,41 @@ function App() {
           left: canvas.position.x,
           top: canvas.position.y,
         }}
-        onContextMenu={(e) => handleRightClick(e, canvas)}
-        onMouseEnter={() => setHoveredCanvasId(canvas.id)} // Fare öğeye girince
-        onMouseLeave={() => setHoveredCanvasId(null)} // Fare öğeden çıkınca
       >
-        {/* ResizableBox sadece fare üzerinde olduğunda aktif */}
-        <ResizableBox
-          width={canvas.size}
-          height={canvas.size}
-          resizeHandles={
-            hoveredCanvasId === canvas.id ? ["se", "sw", "ne", "nw"] : []
-          } // Sadece fare üzerindeyse resize handles göster
-          onResizeStop={(e, data) => {
+        <Resizable
+          size={{
+            width: canvas.width || 100,
+            height: canvas.height || 100,
+          }}
+          onResizeStart={() => {
+            setIsResizing(true); // Disable dragging during resize
+          }}
+          onResizeStop={(e, direction, ref, delta) => {
+            const newWidth = ref.offsetWidth;
+            const newHeight = ref.offsetHeight;
+
             setCanvases((prev) =>
               prev.map((c) =>
-                c.id === canvas.id ? { ...c, size: data.size.width } : c
+                c.id === canvas.id
+                  ? { ...c, width: newWidth, height: newHeight }
+                  : c
               )
             );
+            setIsResizing(false); // Enable dragging after resize stops
           }}
-        ></ResizableBox>
+          style={{ pointerEvents: isResizing ? "none" : "auto" }}
+        >
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              backgroundColor: "#f0f0f0",
+              border: "1px dashed #ccc",
+            }}
+          >
+            {canvas.name}
+          </div>
+        </Resizable>
       </div>
     </Draggable>
   );
@@ -225,6 +247,11 @@ function App() {
             />
           </label>
           <button onClick={handleModalSubmit}>Save</button>
+          {modalData.id && (
+            <button onClick={handleDeleteCanvas} style={{ color: "red" }}>
+              Delete
+            </button>
+          )}
           <button onClick={() => setIsModalOpen(false)}>Cancel</button>
         </div>
       )}
