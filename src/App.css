@@ -2,7 +2,6 @@
   position: relative;
 }
 
-
 .modal {
   position: absolute;
   background: white;
@@ -16,8 +15,14 @@
   display: inline-block;
   position: relative;
   margin: 1rem;
+  background-color: rgb(39, 108, 184);
+  opacity: 0.4;
+  border: 1px solid #000;
 }
-
+.canvas:hover {
+  opacity: 0.75;
+  cursor: pointer;
+}
 .resizable {
   display: inline-block;
 }

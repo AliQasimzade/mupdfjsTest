@@ -95,19 +95,19 @@ function App() {
 
   const handleModalSubmit = () => {
     if (modalData.id) {
-      // Update existing canvas
       setCanvases((prev) =>
         prev.map((canvas) =>
           canvas.id === modalData.id ? { ...canvas, ...modalData } : canvas
         )
       );
     } else {
-      // Create new canvas at modal position
       const newCanvas = {
         ...modalData,
         id: Date.now(),
-        size: parseInt(modalData.size), // Ensure size is treated as an integer
+        size: parseInt(modalData.size) || 44, // Default size fallback
         position: modalPosition,
+        width: 44, // Default width
+        height: 44, // Default height
       };
       setCanvases((prev) => [...prev, newCanvas]);
     }
@@ -128,7 +128,8 @@ function App() {
       key={canvas.id}
       className="resize-handle"
       defaultPosition={{ x: canvas.position.x, y: canvas.position.y }}
-      disabled={isResizing} // Disable dragging while resizing
+      title={canvas?.name}
+      disabled={isResizing}
       onStop={(e, data) => {
         setCanvases((prev) =>
           prev.map((c) =>
@@ -137,6 +138,10 @@ function App() {
               : c
           )
         );
+      }}
+      onContextMenu={(e) => handleRightClick(e, canvas)}
+      onMouseDown={(e) => {
+        e.stopPropagation(); // Prevent dragging during resize interaction
       }}
     >
       <div
@@ -149,11 +154,11 @@ function App() {
       >
         <Resizable
           size={{
-            width: canvas.width || 100,
-            height: canvas.height || 100,
+            width: canvas.width,
+            height: canvas.height,
           }}
           onResizeStart={() => {
-            setIsResizing(true); // Disable dragging during resize
+            setIsResizing(true); // Disable dragging on resize start
           }}
           onResizeStop={(e, direction, ref, delta) => {
             const newWidth = ref.offsetWidth;
@@ -168,17 +173,13 @@ function App() {
             );
             setIsResizing(false); // Enable dragging after resize stops
           }}
-          style={{ pointerEvents: isResizing ? "none" : "auto" }}
         >
           <div
             style={{
               width: "100%",
               height: "100%",
-              backgroundColor: "#f0f0f0",
-              border: "1px dashed #ccc",
             }}
           >
-            {canvas.name}
           </div>
         </Resizable>
       </div>
