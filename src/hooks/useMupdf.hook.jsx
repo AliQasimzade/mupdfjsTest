@@ -53,7 +53,7 @@ export function useMupdf() {
     setCurrentPage(pageIndex);
 
     try {
-      const scale = (window.devicePixelRatio * 96) / 72; // Scale based on device DPI
+      const scale = 0.5; 
       return await mupdfWorker.current.renderPageAsImage(pageIndex, scale);
     } catch (error) {
       console.error("Failed to render page:", error);

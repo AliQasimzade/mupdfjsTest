@@ -27,13 +27,13 @@ const createMupdfWorker = () => {
     }
   };
 
-  const renderPageAsImage = (pageIndex = 2, scale = 0.3) => {
+  const renderPageAsImage = (pageIndex = 0, scale = 0.3) => {
     if (!document) {
       throw new Error("Document not loaded");
     }
 
     try {
-      const page = document.loadPage(2);
+      const page = document.loadPage(pageIndex);
       const pixmap = page.toPixmap(
         [scale, 0, 0, scale, 0, 0],
         mupdfjs.ColorSpace.DeviceRGB

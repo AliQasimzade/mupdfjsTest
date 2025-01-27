@@ -36,7 +36,7 @@ function App() {
           const pageCount = await getPageCount();
           setTotalPages(pageCount);
 
-          const firstPage = await renderPage(0);
+          const firstPage = await renderPage(currentPage);
           setPageImgUrl(
             URL.createObjectURL(new Blob([firstPage], { type: "image/png" }))
           );
@@ -52,13 +52,15 @@ function App() {
   }, [isWorkerInitialized, loadDocument, renderPage, getPageCount]);
 
   const handlePageClick = async ({ selected }) => {
+    console.log(selected);
+
     try {
       setLoading(true);
       const pageData = await renderPage(selected);
       setPageImgUrl(
         URL.createObjectURL(new Blob([pageData], { type: "image/png" }))
       );
-      setCurrentPage(selected + 1);
+      setCurrentPage(selected);
     } catch (error) {
       console.error("Error rendering page:", error);
     } finally {
@@ -179,8 +181,7 @@ function App() {
               width: "100%",
               height: "100%",
             }}
-          >
-          </div>
+          ></div>
         </Resizable>
       </div>
     </Draggable>

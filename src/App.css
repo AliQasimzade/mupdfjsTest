@@ -51,3 +51,55 @@
   height: 100%;
   width: 100%;
 }
+
+/* App.css */
+
+/* Style the container */
+.pagination {
+  display: flex;
+  list-style: none;
+  justify-content: center;
+  gap: 10px;
+  padding: 0;
+  margin: 20px 0;
+}
+
+/* Style each page link */
+.pagination li {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.pagination li:hover {
+  background-color: #f0f0f0;
+}
+
+.pagination .active {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+}
+
+.pagination .previous,
+.pagination .next {
+  font-size: 14px;
+  padding: 8px 12px;
+  color: #007bff;
+  border: 1px solid #007bff;
+  border-radius: 5px;
+}
+
+.pagination .previous:hover,
+.pagination .next:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.pagination .break {
+  color: #666;
+  font-size: 14px;
+  pointer-events: none;
+}
